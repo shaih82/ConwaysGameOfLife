@@ -3,7 +3,6 @@ function Anim(canvas_id) {
   var self = this;
   this.canvas    = $('#'+ canvas_id);
   this.playing   = false;
-  this.storage   = new Storage('conways');
   this.io        = new IO(this).read();
   this.automaton = this.newAutomaton().draw();
   this.io.anim = this; // set at the end because io needs anim.automaton
@@ -11,7 +10,7 @@ function Anim(canvas_id) {
 
 Anim.prototype = {
   newAutomaton: function(preSeed) {
-    return new Automaton(this.canvas, this.io.w, this.io.h, this.io.unit, (preSeed || this.io.preSeed), this.io.renderOptions());
+    return new Automaton(this.canvas, this.io.w, this.io.h, this.io.unit, this.io.renderOptions());
   },
   start: function() {
     var self = this, cellCount = 0;
@@ -52,17 +51,6 @@ Anim.prototype = {
     this.io.read().resetClock();
     this.automaton.updateOptions(this.io);
     this.io.liveCellCount.text(this.automaton.liveCellCount());
-  },
-  random: function() {
-    this.stop();
-    this.io.read().resetClock();
-    this.automaton = this.newAutomaton([]).randomSeed(this.io.maxClumps, this.io.clumpSize).draw();
-    this.io.liveCellCount.text(this.automaton.liveCellCount());
-  },
-  preSeed: function() {
-    this.stop();
-    this.io.read().resetClock();
-    this.automaton = this.newAutomaton().draw();
   },
   mouseX: function() {
     return Math.floor((this.e.pageX - this.canvas.offset().left) / this.automaton.unit);
@@ -106,13 +94,6 @@ Anim.prototype = {
     this.io.liveCellCount.text(this.automaton.liveCellCount());
     if (this.wasPlaying) this.start();
   },
-  line: function(vertical) { 
-    var line = (vertical ? 'v' : 'h') + 'line';
-    this.stop();
-    Automaton.seeds[line] = this.automaton.lineSeed(vertical);
-    this.automaton = this.newAutomaton(line).center().draw();
-  },
-  moveClump: function(where)    { this.automaton.moveClump(where); },
   center:    function()         { this.automaton.center(); },
   bindEvents: function() {
     var self = this;
@@ -130,7 +111,6 @@ Anim.prototype = {
         case 'o':        self.center(); break;
         case 'v':        self.line(true); break;
         case 'h':        self.line(false); break;
-        case 'left': case 'above': case 'right': case 'below': self.moveClump(cmd); break;
         default: return true;
       }
       return false;
@@ -139,14 +119,6 @@ Anim.prototype = {
     this.io.toggle.click(function() { self.playing ? self.stop() : self.start(); });
     $('button#reset').click(function() { self.reset(); });
     $('button#clear').click(function() { self.clear(); });
-    $('button#center').click(function() { self.center(); });
-    $('button#random').click(function() { self.random(); });
-    $('button#save').click(function() {
-      self.stop();
-      self.storage.save('getSeed', self.automaton.getSeed());
-      self.storage.save('inputState', self.io.state());
-    });
-    $('button.lineBtn').click(function() { self.line($(this).hasClass('vertical')); });
     $('select#preSeed').change(function() { self.preSeed(); });
     $('select#renderStyle').change(function() { self.update(); });
     $('form#update').submit(function() { self.update(); return false; });

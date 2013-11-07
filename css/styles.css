@@ -8,7 +8,7 @@ p { margin: 0 0 10px 0;}
 div { margin:0 0 10px 0; }
 #wrap { margin:20px; }
 #grid { margin:0 20px 20px 0; border:1px solid black; overflow: hidden; display: block; float: left; background: #fff; }
-#controls { float: right; width:27% } 
+#controls {float: left; width:27% } 
 #desc, #readout { font-size: 12px; line-height: 14px; padding: 7px 10px; border: 2px solid; background: #fff; }
 #desc { border-color: #ddd; }
 #readout { border-color: #9999dd; }
@@ -17,3 +17,37 @@ div { margin:0 0 10px 0; }
 .cell { float: left; }
 .alive { background: #000; }
 .dead { background: #fff; }
+
+
+.demo-container {
+	float:left;
+	clear:both;
+	box-sizing: border-box;
+	width: 450px;
+	height: 250px;
+	padding: 20px 15px 15px 15px;
+	margin: 15px auto 30px auto;
+	border: 1px solid #ddd;
+	background: #fff;
+	background: linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+	box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.demo-placeholder {
+	width: 100%;
+	height: 100%;
+	font-size: 14px;
+	line-height: 1.2em;
+}
+
+.legend table {
+	border-spacing: 5px;
+}

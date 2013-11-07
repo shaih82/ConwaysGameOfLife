@@ -10,6 +10,7 @@
         
         <canvas id="grid"></canvas>
         
+		
         <div id="controls">
           <div id="desc">
             <ul>
@@ -30,33 +31,11 @@
           <ul id="btns">
             <li>
               <button id="toggle">Play (space)</button><button id="reset">Reset (r)</button>
-            </li>
-            <li>
-              <button id="center" title="Press the letter o to center the cells">Center (o)</button>
-              <button class="lineBtn vertical" title="Seed a line of cells through the vertical center">V Line (v)</button>
-              <button class="lineBtn" title="Seed a line of cells through the horizontal center">H Line (h)</button>
-            </li>
+            </li>            
             <li>
               <button id="clear">Clear (c)</button><button id="random">Random Seed (s)</button><button id="save">Save</button>
             </li>
-            <li>
-              PreSeed:
-              <select id="preSeed">
-                <option selected="selected" value="gosper">Gosper's Glider Gun</option>
-                <option value="sword">Sword</option>
-                <option value="rorschach">Rorschach</option>
-                <option value="fpentomino">F Pentomino</option>
-                <option value="diehard">Diehard</option>
-              </select>
-            </li>
-            <li>
-              Render Style:
-              <select id="renderStyle" />
-                <option selected="selected" value="block">Blocky</option>
-                <option value="moogily">Googily Moogily</option>
-                <option value="fadeIn">Ghosty</option>
-              </select>
-            </li>
+           
           </ul>
         
           <form id="update" action="" method="">
@@ -66,40 +45,100 @@
             </label>
             <label>
               Width: 
-              <input type="text" id="w" value="80" />
+              <input type="text" id="w" value="40" />
             </label>
             <label>
               Height: 
-              <input type="text" id="h" value="80" />
+              <input type="text" id="h" value="40" />
             </label>
             <label>
               Unit: 
               <input type="text" id="unit" value="10" />
             </label>
-            <label>
-              Max Seed Clumps: 
-              <input type="text" id="maxClumps" value="30" />
-            </label>
-            <label>
-              Max Clump Size: 
-              <input type="text" id="clumpSize" value="40" />
-            </label>
+            
             <input type="submit" value="Update" />
           </form>
         </div>
+		
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
     </div>
     
     <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/utils.js"></script>
-    <script type="text/javascript" src="js/storage.js"></script>
+    <script type="text/javascript" src="js/jquery.flot.js"></script>
+	<script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/cell.js"></script>
     <script type="text/javascript" src="js/renderer.js"></script>
     <script type="text/javascript" src="js/io.js"></script>
     <script type="text/javascript" src="js/automaton.js"></script>
     <script type="text/javascript" src="js/anim.js"></script>
     <script type="text/javascript">
-      // Initialization
-      new Anim('grid').bindEvents();
-    </script>
+      
+	  
+	  
+	  // Initialization
+      var anim = new Anim('grid').bindEvents();
+	  
+	  
+	  
+	  var data = [],
+		  totalPoints = 300;
+
+	  function getRandomData() {
+
+			if (data.length >= totalPoints)
+				data = data.slice(1);
+
+			// Do a random walk
+
+			while (data.length < totalPoints) {
+
+				y = anim.automaton.liveCellCount();
+				
+				data.push(y);
+			}
+
+			// Zip the generated y values with the x values
+
+			var res = [];
+			for (var i = 0; i < data.length; ++i) {
+				res.push([i, data[i]])
+			}
+
+			return res;
+	  }
+
+	  //
+	  window.plot = $.plot("#placeholder", 
+			[
+			 { data: getRandomData(), label:"total live cells" }
+			],{
+			series: {
+				shadowSize: 0	// Drawing is faster without shadows
+			},
+			yaxis: {
+				min: 0,
+				max: 1600
+			},
+			xaxis: {
+				show: false
+			}
+		});
+	  
+	  var updateInterval = 30;
+	  function update() {
+
+			plot.setData([getRandomData()]);
+
+			// Since the axes don't change, we don't need to call plot.setupGrid()
+
+			plot.draw();
+			setTimeout(update, updateInterval);
+		}
+
+		update();
+
+   </script>
   </body>
 </html>

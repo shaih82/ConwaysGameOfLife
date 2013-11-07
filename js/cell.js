@@ -1,23 +1,28 @@
-function Cell(x, y, alive, automaton) {
+function Cell(x, y, automaton) {
+  var populationMean = 50;
   this.x = x;
   this.y = y;
-  this.alive = alive;
   this.automaton = automaton;
   this.flaggedForDeath = false;
   this.flaggedForRevive = false;
   this.age = 0;
-}
-// arrays of rgb values [r, g, b]
-Cell.lifeColors = {
-  0: [200, 200, 255], 1: [200, 200, 200], // starved dead
-  2: [0,     0, 200],                     // happy alive
-  3: [0,   200,   0],                     // sexy alive
-  4: [200,   0,   0], 5: [180, 180, 180], // suffocated dead
-  6: [200, 200,   0], 7: [0,   200, 200], // smooshed dead
-  8: [0,     0,   0]                      // fucking dead
+  
+  this.population = populationMean + 5-Math.round(Math.random()*10)
+  var rnd = []
+  for(var i =0;i<4;i++){rnd[i] = Math.random()}
+  rnd.sort()
+  
+  this.sens = rnd[0]/rnd[3];
+  this.cont = (rnd[1]-rnd[0])/rnd[3];
+  this.sick = (rnd[2]-rnd[1])/rnd[3];
+  this.immune = (rnd[3]-rnd[2])/rnd[3];
 }
 
 Cell.prototype = {
+  getColor: function(){
+	
+  },
+  
   // this is where the magic happens
   flagYourselfForDeathMaybe: function(grid) {
     var num = this.numLiveNeighbors();
@@ -35,10 +40,6 @@ Cell.prototype = {
       //if (cell.age) r = rand(3) < 3 ? 3 : 2;
       if (num == r) this.flaggedForRevive = true;
     }
-  },
-  update: function() {
-    if (this.alive) this.age++;
-    return this;
   },
   numLiveNeighbors: function() {
     var liveNeighborsCount = 0;
@@ -62,7 +63,13 @@ Cell.prototype = {
     }
     return true;
   },
-  lifeColor: function() { return Cell.lifeColors[this.numLiveNeighbors()]; },
+  lifeColor: function() { 
+	//return Cell.lifeColors[this.numLiveNeighbors()]; 
+	r = Math.floor((this.sick + this.cont)*255);
+	g = Math.floor((this.sens)*255);
+	b = Math.floor((this.immune)*255);
+	return [r,g,b];
+	},
   toggle:    function() { this.alive = !this.alive; return this; },
   revive:    function() { this.alive = true; return this; },
   kill:      function() { this.alive = false; this.age = 0; return this; }

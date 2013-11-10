@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Conway's Game of Life</title>
+    <title>Disease propagation simulator </title>
     <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen" charset="utf-8" />
   </head>
   <body>
@@ -23,9 +23,6 @@
           <div id="readout">
             <p>Elapsed:          <span id="clock">00:00:00</span></p>
             <p>                  <span id="evolving">Not yet</span></p>
-            <p>Live Cells:       <span id="liveCellCount">0</span></p>
-            <p>Max Population #: <span id="maxPopulation">0</span></p>
-            <p>Oldest Cell:      <span id="oldestCell">0</span></p>
           </div>
           
           <ul id="btns">
@@ -84,35 +81,34 @@
 	  
 	  var data = [],
 		  totalPoints = 300;
-
-	  function getRandomData() {
-
+      
+	  function getData(type) {
 			if (data.length >= totalPoints)
 				data = data.slice(1);
-
 			// Do a random walk
-
 			while (data.length < totalPoints) {
-
-				y = anim.automaton.liveCellCount();
-				
-				data.push(y);
+				if(type == 'sick'){
+				  y = anim.automaton.getStats().sick;
+				  data.push(y);
+				}
+				if(type == 'healthy'){
+				 y = anim.automaton.getStats().healthy;
+				  data.push(y);
+				}
 			}
-
 			// Zip the generated y values with the x values
-
 			var res = [];
 			for (var i = 0; i < data.length; ++i) {
 				res.push([i, data[i]])
 			}
-
 			return res;
 	  }
 
 	  //
 	  window.plot = $.plot("#placeholder", 
 			[
-			 { data: getRandomData(), label:"total live cells" }
+			 { data: getData('sick'), label:"Sick cell count" },
+			 //{ data: getData('healthy'), label:"Healthy cell count" }
 			],{
 			series: {
 				shadowSize: 0	// Drawing is faster without shadows
@@ -129,7 +125,7 @@
 	  var updateInterval = 30;
 	  function update() {
 
-			plot.setData([getRandomData()]);
+			plot.setData([getData('sick')]);
 
 			// Since the axes don't change, we don't need to call plot.setupGrid()
 

@@ -5,11 +5,9 @@ function Automaton(canvas, w, h, unit, renderOptions) {
   //cell size in pixels
   this.unit = unit || 10;
   this.grid = [];
-  this.liveCells = [];
-  this.lastLiveCellNum = 0;
-  this.maxPopulation = 0;
   this.renderer = new Renderer(canvas, this, renderOptions);
-  
+  this.totalSick = 0;
+  this.totalHealthy = 0;
   // build grid and add cells to it (all dead)
   this.traverseGrid(function(cell, x, y) {
     this.grid[x][y] = new Cell(x, y, this);    
@@ -49,20 +47,21 @@ Automaton.prototype = {
     this.draw();
   },
   update: function() {
+	var totalHealthy = 0.0,
+	       totalSick = 0.0;
+    this.totalHealthy =0;
+    this.totalSick = 0; 
 	//Tow tracerseGrid, one for flag cells
     return this.traverseGrid(function(cell, x, y) {
-      cell.flagYourselfForDeathMaybe();
+      cell.flagStep();
     })
 	//Second for actual kill or revive
 	.traverseGrid(function(cell, x, y) {
-      cell.update();
-	  /*
-	  if (cell.flaggedForDeath) {
-        cell.kill().flaggedForDeath = false;
-      } else if (!cell.alive && cell.flaggedForRevive) {
-        cell.revive().flaggedForRevive = false;
-      }*/
+      cell.updateStep();
+	  this.totalHealthy += (cell.sens + cell.immune);
+	  this.totalSick += (cell.sick + cell.cont);
     });
+	return this;
   },
   draw: function() {
     this.renderer.clear();
@@ -70,48 +69,15 @@ Automaton.prototype = {
       this.renderer.draw(cell);
     });
   },
-  liveCellCount: function() {
-    this.lastLiveCellNum = this.liveCellNum; 
-    this.liveCellNum = 0;
-    this.traverseGrid(function(cell, x, y) {
-      if (cell.alive) this.liveCellNum++;
-    });
-    return this.liveCellNum;
-  },
-  evolving: function() {
-    return this.lastLiveCellNum != this.liveCellNum;
-  },
-  getOldestCell: function() {
-    var cells = this.getLiveCells();
-    
-    for (var i = 0, len = cells.length; i < len; i++) {
-      var cell = cells[i],
-          age = this.oldestCell ? this.oldestCell.age : 0;
-      if (cell.age > age) this.oldestCell = cell;
-    }
-    return this.oldestCell || {age:0};
-  },
-  getMaxPopulation: function(liveCellCount) {
-    return this.maxPopulation = (liveCellCount > this.maxPopulation) ? liveCellCount : this.maxPopulation;
-  },
   // find a cell by the collision of a click with a cell on the coordinate space
   getCell: function(x, y) {
     return this.grid[x][y];
   },
-  getLiveCells: function() {
-    this.liveCells = [];
-    this.traverseGrid(function(cell, x, y) {
-      if (cell.alive) this.liveCells.push(cell);
-    });
-    return this.liveCells;
-  },
   getStats: function(cellCount) {
-    var oldestCell = this.getOldestCell();
     return { 
-      liveCellCount: cellCount, 
-      maxPopulation: this.getMaxPopulation(cellCount),
-      oldestCell:    oldestCell.age + ' <code>{x: '+ oldestCell.x +', y:'+ oldestCell.y +'}</code>',
-      evolving:      this.evolving() ? 'Evolving' : 'Stabilized'
+      sick: this.totalSick, 
+      healthy: this.totalHealthy,
+      evolving:      'Evolving' //: 'Stabilized'
     }
   },
 }

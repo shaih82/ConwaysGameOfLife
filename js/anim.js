@@ -17,13 +17,11 @@ Anim.prototype = {
     
     setTimeout(function() {
       self.automaton.update().draw();
-      cellCount = self.automaton.liveCellCount();
       self.io.outputStats(self.automaton.getStats(cellCount, this.playing));
-      if (cellCount < 3) return self.playing = false;
       if (self.playing) setTimeout(arguments.callee, 1000 / self.io.fps);
     }, 1000 / this.io.fps);
     
-    this.playing = true;
+	this.playing = true;
     this.io.showClock(true).toggle.text('Pause (space)');
   },
   stop: function() {
@@ -38,19 +36,16 @@ Anim.prototype = {
     this.stop();
     this.io.read().resetClock();
     this.automaton = this.newAutomaton().draw();
-    this.io.liveCellCount.text(this.automaton.liveCellCount());
   },
   clear: function() {
     this.stop();
     this.io.read().resetClock();
     this.automaton = this.newAutomaton([]).draw();
-    this.io.liveCellCount.text(0);
     return this;
   },
   update: function() {
     this.io.read().resetClock();
     this.automaton.updateOptions(this.io);
-    this.io.liveCellCount.text(this.automaton.liveCellCount());
   },
   mouseX: function() {
     return Math.floor((this.e.pageX - this.canvas.offset().left) / this.automaton.unit);
@@ -67,12 +62,9 @@ Anim.prototype = {
     
     var x = this.mouseX(),
         y = this.mouseY(),
-        cell = this.automaton.getCell(x, y).toggle();
+        cell = this.automaton.getCell(x, y).random();
     
     this.automaton.draw();
-    this.io.liveCellCount.text(this.automaton.liveCellCount());
-
-    if (cell.alive) c_log(x, y);
     return this;
   },
   startCellTrace: function() {
@@ -80,21 +72,15 @@ Anim.prototype = {
     
     this.canvas.mousemove(function(e) {
       self.e = e;
-      var cell = self.automaton.getCell(self.mouseX(), self.mouseY());
-      
-      if (cell.notIn(self.tracedCells)) {
-        cell.revive();
-        self.tracedCells.push(cell);
-        self.automaton.draw();
-      }
+      var cell = self.automaton.getCell(self.mouseX(), self.mouseY());  
+  	  cell.random();
+	  self.automaton.draw();
     });
   },
   endCellTrace: function() {
     this.canvas.unbind('mousemove');
-    this.io.liveCellCount.text(this.automaton.liveCellCount());
     if (this.wasPlaying) this.start();
   },
-  center:    function()         { this.automaton.center(); },
   bindEvents: function() {
     var self = this;
     
@@ -116,7 +102,9 @@ Anim.prototype = {
       return false;
     });
     
-    this.io.toggle.click(function() { self.playing ? self.stop() : self.start(); });
+    this.io.toggle.click(function() { 
+		self.playing ? self.stop() : self.start(); 
+	});
     $('button#reset').click(function() { self.reset(); });
     $('button#clear').click(function() { self.clear(); });
     $('select#preSeed').change(function() { self.preSeed(); });

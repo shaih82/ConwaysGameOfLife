@@ -17,7 +17,7 @@ Anim.prototype = {
     
     setTimeout(function() {
       self.automaton.update().draw();
-      self.io.outputStats(self.automaton.getStats(cellCount, this.playing));
+      self.io.outputStats(self.automaton.getStats(cellCount));
       if (self.playing) setTimeout(arguments.callee, 1000 / self.io.fps);
     }, 1000 / this.io.fps);
     

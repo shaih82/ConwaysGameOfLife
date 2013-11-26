@@ -8,6 +8,8 @@ function Automaton(canvas, w, h, unit, renderOptions) {
   this.renderer = new Renderer(canvas, this, renderOptions);
   this.totalSick = 0;
   this.totalHealthy = 0;
+  this.age = 0;
+  this.max = 0;
   // build grid and add cells to it (all dead)
   this.traverseGrid(function(cell, x, y) {
     this.grid[x][y] = new Cell(x, y, this);    
@@ -50,7 +52,8 @@ Automaton.prototype = {
 	var totalHealthy = 0.0,
 	       totalSick = 0.0;
     this.totalHealthy =0;
-    this.totalSick = 0; 
+    this.totalSick = 0;
+    this.age += 1;
 	//Tow tracerseGrid, one for flag cells
     return this.traverseGrid(function(cell, x, y) {
       cell.flagStep();
@@ -74,10 +77,13 @@ Automaton.prototype = {
     return this.grid[x][y];
   },
   getStats: function(cellCount) {
-    return { 
+    this.max = Math.max(this.max,this.totalSick);
+	return { 
       sick: this.totalSick, 
       healthy: this.totalHealthy,
-      evolving:      'Evolving' //: 'Stabilized'
+	  age: this.age,
+	  max: this.max,
+      evolving:      this.totalSick > 0? 'Evolving': 'Stabilized'
     }
   },
 }
